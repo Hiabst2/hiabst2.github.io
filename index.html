@@ -1,1 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-Code Training</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 QR-Code Training</h1>
+            <div class="install-prompt" id="installPrompt">
+                <button id="installBtn">📱 Als App installieren</button>
+            </div>
+        </header>
 
+        <main>
+            <!-- Schwierigkeitsgrad -->
+            <section class="difficulty-section">
+                <h2>Schwierigkeitsgrad</h2>
+                <div class="difficulty-buttons">
+                    <button class="diff-btn active" data-level="easy">Einfach</button>
+                    <button class="diff-btn" data-level="medium">Mittel</button>
+                    <button class="diff-btn" data-level="hard">Schwer</button>
+                </div>
+            </section>
+
+            <!-- Text Input -->
+            <section class="input-section">
+                <h2>Eigener Text (optional)</h2>
+                <input type="text" id="customText" placeholder="Text eingeben..." maxlength="50">
+            </section>
+
+            <!-- Generation Buttons -->
+            <section class="generate-section">
+                <button id="generateCustom" class="btn primary">QR-Code erstellen</button>
+                <button id="generateRandom" class="btn secondary">Zufälliger QR-Code</button>
+            </section>
+
+            <!-- QR-Code Display -->
+            <section class="qr-section">
+                <div class="qr-container" id="qrContainer">
+                    <div class="qr-placeholder">
+                        📱 Noch kein QR-Code generiert
+                    </div>
+                </div>
+                <div class="qr-info" id="qrInfo"></div>
+            </section>
+
+            <!-- Answer Input -->
+            <section class="answer-section">
+                <h2>Deine Antwort</h2>
+                <input type="text" id="answerInput" placeholder="Was steht im QR-Code?" autocomplete="off">
+                <div class="answer-buttons">
+                    <button id="checkAnswer" class="btn primary">Prüfen</button>
+                    <button id="showHint" class="btn hint">💡 Hint</button>
+                </div>
+            </section>
+
+            <!-- Result Display -->
+            <div class="result" id="result"></div>
+
+            <!-- Statistics -->
+            <section class="stats-section">
+                <h2>📊 Statistiken</h2>
+                <div class="stats-display" id="statsDisplay">
+                    Noch keine Versuche
+                </div>
+                <button id="resetStats" class="btn danger">Statistiken zurücksetzen</button>
+            </section>
+
+            <!-- Scanner Feature -->
+            <section class="scanner-section">
+                <h2>📷 QR-Code Scanner</h2>
+                <button id="startScanner" class="btn scanner">Kamera starten</button>
+                <video id="scanner" style="display: none;"></video>
+                <canvas id="scannerCanvas" style="display: none;"></canvas>
+            </section>
+        </main>
+    </div>
+
+    <!-- Hint Modal -->
+    <div class="modal" id="hintModal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>💡 Hint</h2>
+            <div id="hintContent"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
