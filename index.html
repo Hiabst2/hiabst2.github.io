@@ -3,97 +3,552 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR-Code Training</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2196F3">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>QR Training App</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .diff-btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: 2px solid #ddd; 
+            background: white; 
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .diff-btn.active { 
+            background: #4CAF50; 
+            color: white; 
+            border-color: #4CAF50;
+        }
+        .diff-btn:hover {
+            border-color: #4CAF50;
+        }
+        #qrContainer { 
+            text-align: center; 
+            margin: 20px 0;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-placeholder {
+            width: 280px; 
+            height: 280px; 
+            border: 2px dashed #ccc; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            background: #fafafa;
+            border-radius: 10px;
+        }
+        .result.correct { 
+            color: #4CAF50; 
+            font-weight: bold;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .result.incorrect { 
+            color: #f44336; 
+            font-weight: bold;
+            background: #ffeaea;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        #installPrompt {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        #installBtn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .close:hover { color: #000; }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #scanner, #scannerCanvas { display: none; }
+        .stats {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        #qrInfo {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #1976d2;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🔍 QR-Code Training</h1>
-            <div class="install-prompt" id="installPrompt">
-                <button id="installBtn">📱 Als App installieren</button>
+        <div id="installPrompt">
+            <p>📱 Diese App kann als PWA installiert werden!</p>
+            <button id="installBtn">App installieren</button>
+        </div>
+
+        <h1 style="text-align: center; color: #4CAF50;">🔲 QR-Code Training</h1>
+        
+        <div>
+            <h3>Schwierigkeit:</h3>
+            <button class="diff-btn active" data-level="easy">Einfach</button>
+            <button class="diff-btn" data-level="medium">Mittel</button>
+            <button class="diff-btn" data-level="hard">Schwer</button>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <input type="text" id="customText" placeholder="Eigener Text..." style="width: 250px;">
+            <button id="generateCustom">Eigenen QR erstellen</button>
+            <button id="generateRandom">Zufälligen QR erstellen</button>
+        </div>
+
+        <div id="qrContainer">
+            <div class="qr-placeholder">
+                Hier erscheint der QR-Code
             </div>
-        </header>
+        </div>
 
-        <main>
-            <!-- Schwierigkeitsgrad -->
-            <section class="difficulty-section">
-                <h2>Schwierigkeitsgrad</h2>
-                <div class="difficulty-buttons">
-                    <button class="diff-btn active" data-level="easy">Einfach</button>
-                    <button class="diff-btn" data-level="medium">Mittel</button>
-                    <button class="diff-btn" data-level="hard">Schwer</button>
-                </div>
-            </section>
+        <div id="qrInfo"></div>
 
-            <!-- Text Input -->
-            <section class="input-section">
-                <h2>Eigener Text (optional)</h2>
-                <input type="text" id="customText" placeholder="Text eingeben..." maxlength="50">
-            </section>
+        <div style="margin: 20px 0;">
+            <input type="text" id="answerInput" placeholder="Was steht im QR-Code?" style="width: 300px;">
+            <button id="checkAnswer">Antwort prüfen</button>
+            <button id="showHint">💡 Tipp anzeigen</button>
+        </div>
 
-            <!-- Generation Buttons -->
-            <section class="generate-section">
-                <button id="generateCustom" class="btn primary">QR-Code erstellen</button>
-                <button id="generateRandom" class="btn secondary">Zufälliger QR-Code</button>
-            </section>
+        <div id="result" class="result"></div>
 
-            <!-- QR-Code Display -->
-            <section class="qr-section">
-                <div class="qr-container" id="qrContainer">
-                    <div class="qr-placeholder">
-                        📱 Noch kein QR-Code generiert
-                    </div>
-                </div>
-                <div class="qr-info" id="qrInfo"></div>
-            </section>
+        <div class="stats">
+            <div id="statsDisplay">Noch keine Versuche</div>
+            <button id="resetStats" style="background: #f44336; margin-top: 10px;">Statistiken zurücksetzen</button>
+        </div>
 
-            <!-- Answer Input -->
-            <section class="answer-section">
-                <h2>Deine Antwort</h2>
-                <input type="text" id="answerInput" placeholder="Was steht im QR-Code?" autocomplete="off">
-                <div class="answer-buttons">
-                    <button id="checkAnswer" class="btn primary">Prüfen</button>
-                    <button id="showHint" class="btn hint">💡 Hint</button>
-                </div>
-            </section>
-
-            <!-- Result Display -->
-            <div class="result" id="result"></div>
-
-            <!-- Statistics -->
-            <section class="stats-section">
-                <h2>📊 Statistiken</h2>
-                <div class="stats-display" id="statsDisplay">
-                    Noch keine Versuche
-                </div>
-                <button id="resetStats" class="btn danger">Statistiken zurücksetzen</button>
-            </section>
-
-            <!-- Scanner Feature -->
-            <section class="scanner-section">
-                <h2>📷 QR-Code Scanner</h2>
-                <button id="startScanner" class="btn scanner">Kamera starten</button>
-                <video id="scanner" style="display: none;"></video>
-                <canvas id="scannerCanvas" style="display: none;"></canvas>
-            </section>
-        </main>
+        <div style="text-align: center; margin: 20px 0;">
+            <button id="startScanner">📷 QR-Code scannen</button>
+            <video id="scanner" width="300" height="300"></video>
+            <canvas id="scannerCanvas"></canvas>
+        </div>
     </div>
 
-    <!-- Hint Modal -->
-    <div class="modal" id="hintModal">
+    <!-- Modal für Hinweise -->
+    <div id="hintModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>💡 Hint</h2>
+            <h2>💡 Tipp</h2>
             <div id="hintContent"></div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-    <script src="app.js"></script>
+    <!-- QRious Bibliothek (leichter und zuverlässiger) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+    
+    <script>
+        // QR Training App mit QRious
+        class QRTrainer {
+            constructor() {
+                this.currentText = '';
+                this.currentDifficulty = 'easy';
+                this.stats = this.loadStats();
+                this.deferredPrompt = null;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateStatsDisplay();
+                this.checkInstallPrompt();
+                this.registerServiceWorker();
+            }
+
+            bindEvents() {
+                // Difficulty buttons
+                document.querySelectorAll('.diff-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.setDifficulty(e.target.dataset.level));
+                });
+
+                // Generate buttons
+                document.getElementById('generateCustom').addEventListener('click', () => this.generateCustomQR());
+                document.getElementById('generateRandom').addEventListener('click', () => this.generateRandomQR());
+
+                // Answer handling
+                document.getElementById('checkAnswer').addEventListener('click', () => this.checkAnswer());
+                document.getElementById('answerInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.checkAnswer();
+                });
+
+                // Hint
+                document.getElementById('showHint').addEventListener('click', () => this.showHint());
+
+                // Stats reset
+                document.getElementById('resetStats').addEventListener('click', () => this.resetStats());
+
+                // Scanner
+                document.getElementById('startScanner').addEventListener('click', () => this.startScanner());
+
+                // Modal
+                document.querySelector('.close').addEventListener('click', () => this.closeModal());
+                document.getElementById('hintModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'hintModal') this.closeModal();
+                });
+
+                // Install prompt
+                document.getElementById('installBtn').addEventListener('click', () => this.installApp());
+            }
+
+            setDifficulty(level) {
+                this.currentDifficulty = level;
+                document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`[data-level="${level}"]`).classList.add('active');
+            }
+
+            generateCustomQR() {
+                const text = document.getElementById('customText').value.trim();
+                if (!text) {
+                    alert('Bitte gib einen Text ein!');
+                    return;
+                }
+                this.currentText = text;
+                this.createQRCode();
+            }
+
+            generateRandomQR() {
+                this.currentText = this.generateRandomText();
+                this.createQRCode();
+            }
+
+            generateRandomText() {
+                const patterns = {
+                    easy: {
+                        chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+                        length: [3, 6]
+                    },
+                    medium: {
+                        chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ',
+                        length: [8, 15]
+                    },
+                    hard: {
+                        chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .-_@#$%&',
+                        length: [12, 25]
+                    }
+                };
+
+                const pattern = patterns[this.currentDifficulty];
+                const length = Math.floor(Math.random() * (pattern.length[1] - pattern.length[0] + 1)) + pattern.length[0];
+                
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += pattern.chars[Math.floor(Math.random() * pattern.chars.length)];
+                }
+                return result;
+            }
+
+            createQRCode() {
+                const container = document.getElementById('qrContainer');
+                
+                try {
+                    // QRious verwenden (einfacher als QRCode.js)
+                    const qr = new QRious({
+                        element: document.createElement('canvas'),
+                        value: this.currentText,
+                        size: 280,
+                        level: this.currentDifficulty === 'easy' ? 'L' : (this.currentDifficulty === 'medium' ? 'M' : 'H')
+                    });
+
+                    container.innerHTML = '';
+                    container.appendChild(qr.canvas);
+
+                    // Update info
+                    const mode = this.detectEncodingMode(this.currentText);
+                    document.getElementById('qrInfo').style.display = 'block';
+                    document.getElementById('qrInfo').textContent = 
+                        `Schwierigkeit: ${this.currentDifficulty.toUpperCase()} | Zeichen: ${this.currentText.length} | Modus: ${mode}`;
+
+                    // Reset answer
+                    document.getElementById('answerInput').value = '';
+                    document.getElementById('result').className = 'result';
+                    document.getElementById('result').textContent = '';
+
+                } catch (error) {
+                    console.error('QR Code generation failed:', error);
+                    container.innerHTML = '<div class="qr-placeholder">❌ Fehler beim Erstellen<br>Versuche es erneut!</div>';
+                }
+            }
+
+            detectEncodingMode(text) {
+                if (/^\d+$/.test(text)) return 'Numeric';
+                if (/^[A-Z0-9 $%*+\-.\/:]+$/.test(text)) return 'Alphanumeric';
+                return 'Byte';
+            }
+
+            checkAnswer() {
+                if (!this.currentText) {
+                    alert('Erst QR-Code generieren!');
+                    return;
+                }
+
+                const userAnswer = document.getElementById('answerInput').value.trim();
+                if (!userAnswer) {
+                    alert('Bitte gib eine Antwort ein!');
+                    return;
+                }
+
+                this.stats.total++;
+                const resultDiv = document.getElementById('result');
+
+                if (userAnswer === this.currentText) {
+                    this.stats.correct++;
+                    resultDiv.className = 'result correct';
+                    resultDiv.textContent = '✅ RICHTIG! Gut gemacht!';
+                } else {
+                    resultDiv.className = 'result incorrect';
+                    resultDiv.textContent = `❌ FALSCH! Richtige Antwort: "${this.currentText}"`;
+                }
+
+                this.saveStats();
+                this.updateStatsDisplay();
+            }
+
+            showHint() {
+                if (!this.currentText) {
+                    alert('Erst QR-Code generieren!');
+                    return;
+                }
+
+                const mode = this.detectEncodingMode(this.currentText);
+                const length = this.currentText.length;
+                
+                let hint = `<strong>Encoding-Modus:</strong> ${mode}<br>`;
+                hint += `<strong>Länge:</strong> ${length} Zeichen<br>`;
+                
+                if (length > 2) {
+                    hint += `<strong>Beginnt mit:</strong> "${this.currentText[0]}"<br>`;
+                    hint += `<strong>Endet mit:</strong> "${this.currentText[length-1]}"`;
+                }
+
+                if (length > 4) {
+                    const mid = Math.floor(length / 2);
+                    hint += `<br><strong>Zeichen in der Mitte:</strong> "${this.currentText[mid]}"`;
+                }
+
+                document.getElementById('hintContent').innerHTML = hint;
+                document.getElementById('hintModal').style.display = 'block';
+            }
+
+            closeModal() {
+                document.getElementById('hintModal').style.display = 'none';
+            }
+
+            loadStats() {
+                try {
+                    const saved = localStorage.getItem('qr-training-stats');
+                    return saved ? JSON.parse(saved) : { correct: 0, total: 0 };
+                } catch (e) {
+                    return { correct: 0, total: 0 };
+                }
+            }
+
+            saveStats() {
+                try {
+                    localStorage.setItem('qr-training-stats', JSON.stringify(this.stats));
+                } catch (e) {
+                    console.warn('Konnte Statistiken nicht speichern');
+                }
+            }
+
+            updateStatsDisplay() {
+                const display = document.getElementById('statsDisplay');
+                const { correct, total } = this.stats;
+
+                if (total > 0) {
+                    const percentage = ((correct / total) * 100).toFixed(1);
+                    display.textContent = `Richtig: ${correct}/${total} (${percentage}%)`;
+                } else {
+                    display.textContent = 'Noch keine Versuche';
+                }
+            }
+
+            resetStats() {
+                if (confirm('Statistiken wirklich zurücksetzen?')) {
+                    this.stats = { correct: 0, total: 0 };
+                    this.saveStats();
+                    this.updateStatsDisplay();
+                    document.getElementById('result').className = 'result';
+                    document.getElementById('result').textContent = '';
+                }
+            }
+
+            // PWA Installation
+            checkInstallPrompt() {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    this.deferredPrompt = e;
+                    document.getElementById('installPrompt').style.display = 'block';
+                });
+            }
+
+            installApp() {
+                if (this.deferredPrompt) {
+                    this.deferredPrompt.prompt();
+                    this.deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('App installiert');
+                        }
+                        this.deferredPrompt = null;
+                        document.getElementById('installPrompt').style.display = 'none';
+                    });
+                }
+            }
+
+            registerServiceWorker() {
+                if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(() => console.log('Service Worker registriert'))
+                        .catch(err => console.log('Service Worker Fehler:', err));
+                }
+            }
+
+            // Camera Scanner
+            startScanner() {
+                if (!navigator.mediaDevices) {
+                    alert('Kamera nicht verfügbar');
+                    return;
+                }
+
+                const video = document.getElementById('scanner');
+                const canvas = document.getElementById('scannerCanvas');
+                const context = canvas.getContext('2d');
+
+                navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 300 },
+                        height: { ideal: 300 }
+                    } 
+                })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    video.play();
+
+                    const scanFrame = () => {
+                        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                            canvas.height = video.videoHeight;
+                            canvas.width = video.videoWidth;
+                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                            if (typeof jsQR !== 'undefined') {
+                                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                                
+                                if (code) {
+                                    alert(`QR-Code erkannt: ${code.data}`);
+                                    stream.getTracks().forEach(track => track.stop());
+                                    video.style.display = 'none';
+                                    return;
+                                }
+                            }
+                        }
+                        requestAnimationFrame(scanFrame);
+                    };
+                    scanFrame();
+                })
+                .catch(err => {
+                    console.error('Kamera-Fehler:', err);
+                    alert('Kamera-Zugriff fehlgeschlagen');
+                });
+            }
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Warten bis QRious geladen ist
+            if (typeof QRious !== 'undefined') {
+                new QRTrainer();
+            } else {
+                // Fallback: Warten und erneut versuchen
+                setTimeout(() => {
+                    if (typeof QRious !== 'undefined') {
+                        new QRTrainer();
+                    } else {
+                        console.error('QRious Bibliothek konnte nicht geladen werden');
+                        alert('Fehler: QR-Code Bibliothek konnte nicht geladen werden. Bitte Seite neu laden.');
+                    }
+                }, 1000);
+            }
+        });
+    </script>
 </body>
 </html>
