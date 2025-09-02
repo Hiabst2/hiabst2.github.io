@@ -1,1 +1,345 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    background: linear-gradient(45deg, #2196F3, #21CBF3);
+    color: white;
+    border-radius: 15px;
+    margin: -20px -20px 30px -20px;
+    padding: 30px 20px;
+}
+
+h1 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #444;
+}
+
+section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+/* Difficulty Buttons */
+.difficulty-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.diff-btn {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    min-width: 80px;
+}
+
+.diff-btn.active {
+    background: #2196F3;
+    color: white;
+    border-color: #2196F3;
+}
+
+.diff-btn:hover:not(.active) {
+    border-color: #2196F3;
+    background: #f0f8ff;
+}
+
+/* Input Fields */
+input[type="text"] {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #2196F3;
+}
+
+/* Buttons */
+.btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+    text-decoration: none;
+    margin: 5px;
+}
+
+.btn.primary {
+    background: #2196F3;
+    color: white;
+}
+
+.btn.primary:hover {
+    background: #1976D2;
+    transform: translateY(-2px);
+}
+
+.btn.secondary {
+    background: #FF9800;
+    color: white;
+}
+
+.btn.secondary:hover {
+    background: #F57C00;
+    transform: translateY(-2px);
+}
+
+.btn.hint {
+    background: #9C27B0;
+    color: white;
+}
+
+.btn.hint:hover {
+    background: #7B1FA2;
+}
+
+.btn.danger {
+    background: #f44336;
+    color: white;
+    font-size: 14px;
+    padding: 10px 20px;
+}
+
+.btn.scanner {
+    background: #4CAF50;
+    color: white;
+}
+
+/* Generate Section */
+.generate-section {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.generate-section .btn {
+    flex: 1;
+    margin: 0;
+    min-width: 150px;
+}
+
+/* QR Code Display */
+.qr-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    background: white;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.qr-placeholder {
+    color: #999;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+#qrCanvas {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.qr-info {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Answer Section */
+.answer-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.answer-buttons .btn {
+    flex: 1;
+    margin: 0;
+}
+
+/* Result Display */
+.result {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 20px 0;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.result.correct {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.result.incorrect {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Statistics */
+.stats-display {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2196F3;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+}
+
+/* Install Prompt */
+.install-prompt {
+    margin-top: 15px;
+}
+
+#installBtn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+#installBtn:hover {
+    background: white;
+    color: #2196F3;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close:hover {
+    color: #000;
+}
+
+/* Scanner */
+#scanner {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .difficulty-buttons {
+        flex-direction: column;
+    }
+    
+    .generate-section {
+        flex-direction: column;
+    }
+    
+    .answer-buttons {
+        flex-direction: column;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+    }
+}
+
+/* PWA Styles */
+@media (display-mode: standalone) {
+    .install-prompt {
+        display: none;
+    }
+    
+    header {
+        padding-top: 40px; /* Account for status bar */
+    }
+}
